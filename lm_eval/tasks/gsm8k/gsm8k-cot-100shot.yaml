@@ -13,8 +13,8 @@ doc_to_target: "{{answer.split('####')[-1].strip() if answer is defined else tar
 generation_kwargs:
   do_sample: false
   until:
-    - "Q:"
-    - "</s>"
+    # - "Q:"
+    # - "</s>"
     - "<|im_end|>"
 filter_list:
   - name: strict-match
