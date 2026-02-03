@@ -1,0 +1,46 @@
+task: gsm8k_cot_5shot
+dataset_path: gsm8k
+dataset_name: main
+training_split: train
+test_split: test
+fewshot_split: train
+num_fewshot: 5
+output_type: generate_until
+doc_to_text: |
+  Q: {{question}}
+  A:
+doc_to_target: "{{answer.split('####')[-1].strip() if answer is defined else target}}"
+generation_kwargs:
+  do_sample: false
+  until:
+    # - "Q:"
+    # - "</s>"
+    - "<|im_end|>"
+filter_list:
+  - name: strict-match
+    filter:
+      - function: regex
+        regex_pattern: "The answer is (\\-?[0-9\\.,]+)."
+      - function: take_first
+  - name: flexible-extract
+    filter:
+      - function: regex
+        group_select: -1
+        regex_pattern: "(-?[$0-9.,]{2,})|(-?[0-9]+)"
+      - function: take_first
+metadata:
+  version: 3.0
+tag:
+  - chain_of_thought
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+    ignore_case: true
+    ignore_punctuation: false
+    regexes_to_ignore:
+      - ","
+      - "\\$"
+      - "(?s).*#### "
+      - "\\.$"
+repeats: 1
